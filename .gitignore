@@ -1,0 +1,45 @@
+# Rust / Cargo
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# ESP-IDF build artifacts
+.embuild/
+/build/
+/managed_components/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+
+# Bindgen generated
+/lvgl-sys/src/bindings.rs
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Debug
+*.log
+*.pid
+
+# Compiled objects
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Backup files
+*.bak
+*.backup
+*.orig

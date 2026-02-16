@@ -1,0 +1,34 @@
+[workspace]
+members = ["lvgl-sys", "examples/esp32", "examples/simulator"]
+
+[package]
+name = "lvgl"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Safe LVGL wrapper for Rust - platform independent, works on ESP32 and desktop"
+
+[lib]
+name = "lvgl"
+
+[dependencies]
+lvgl-sys = { path = "lvgl-sys" }
+log = "0.4"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+
+[profile.dev]
+debug = true
+opt-level = "z"
+
+[features]
+default = []
+
+# Enable std support
+std = []
+
+# Build lvgl-sys for desktop simulator (selects simulator lv_conf.h, enables std in bindings)
+simulator = ["std", "lvgl-sys/simulator"]

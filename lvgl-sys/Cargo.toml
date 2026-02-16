@@ -1,0 +1,20 @@
+[package]
+name = "lvgl-sys"
+version = "0.1.0"
+edition = "2021"
+description = "Raw FFI bindings to LVGL for ESP32"
+license = "MIT"
+
+[lib]
+name = "lvgl_sys"
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.69"
+cc = "1.0"
+glob = "0.3"
+
+[features]
+default = []
+simulator = []

@@ -1,0 +1,3 @@
+# Optional: override LVGL source path (auto-downloaded if not set)
+# [env]
+# LVGL_PATH = { relative = true, value = "lvgl" }

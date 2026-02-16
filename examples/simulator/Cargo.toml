@@ -1,0 +1,9 @@
+[package]
+name = "lvgl-simulator-example"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+lvgl = { path = "../..", features = ["simulator"] }
+sdl2 = "0.36"

@@ -1,0 +1,53 @@
+# ESP-IDF Configuration for LVGL
+# This file sets up sensible defaults for running LVGL on ESP32
+
+# Increase main task stack size (LVGL needs more stack)
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# Enable high-frequency timer for LVGL tick
+CONFIG_ESP_TIMER_TASK_STACK_SIZE=4096
+
+# Memory optimization
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ=240
+
+# Increase SPI DMA buffer for display transfers
+CONFIG_SPI_MASTER_ISR_IN_IRAM=y
+
+# Heap configuration
+CONFIG_HEAP_POISONING_DISABLED=y
+
+# FreeRTOS configuration
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_ENABLE_BACKWARD_COMPATIBILITY=y
+
+# Flash configuration
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+
+# Partition table - use single factory app, no OTA
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# Disable watchdog during long operations (optional, for debugging)
+# CONFIG_ESP_INT_WDT=n
+# CONFIG_ESP_TASK_WDT=n
+
+# Log level
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_DEFAULT_LEVEL=3
+
+# Enable GPIO glitch filter (for touch input stability)
+CONFIG_GPIO_CTRL_FUNC_IN_IRAM=y
+
+# SPIRAM / PSRAM configuration (enable if your board has PSRAM)
+# Uncomment these if you have PSRAM and need extra memory:
+# CONFIG_SPIRAM=y
+# CONFIG_SPIRAM_USE_MALLOC=y
+# CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=4096
+# CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+# CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=32768
+
+# For ESP32-S3 with Octal PSRAM (8MB):
+# CONFIG_SPIRAM_MODE_OCT=y
+# CONFIG_SPIRAM_SPEED_80M=y

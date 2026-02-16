@@ -1,0 +1,47 @@
+[target.xtensa-esp32-espidf]
+linker = "ldproxy"
+runner = "espflash flash --monitor"
+rustflags = ["--cfg", "espidf_time64"]
+
+[target.xtensa-esp32s2-espidf]
+linker = "ldproxy"
+runner = "espflash flash --monitor"
+rustflags = ["--cfg", "espidf_time64"]
+
+[target.xtensa-esp32s3-espidf]
+linker = "ldproxy"
+runner = "espflash flash --monitor"
+rustflags = ["--cfg", "espidf_time64"]
+
+[target.riscv32imc-esp-espidf]
+linker = "ldproxy"
+runner = "espflash flash --monitor"
+rustflags = ["--cfg", "espidf_time64"]
+
+[target.riscv32imac-esp-espidf]
+linker = "ldproxy"
+runner = "espflash flash --monitor"
+rustflags = ["--cfg", "espidf_time64"]
+
+[env]
+MCU = "esp32s3"
+ESP_IDF_VERSION = "v5.2.2"
+CMAKE_C_FLAGS = "-fsigned-char"
+CMAKE_CXX_FLAGS = "-fsigned-char"
+
+# Cross-compilers for cc crate (per-target CC env vars)
+CC_xtensa_esp32_espidf = "xtensa-esp32-elf-gcc"
+CC_xtensa_esp32s2_espidf = "xtensa-esp32s2-elf-gcc"
+CC_xtensa_esp32s3_espidf = "xtensa-esp32s3-elf-gcc"
+CC_riscv32imc_esp_espidf = "riscv32-esp-elf-gcc"
+CC_riscv32imac_esp_espidf = "riscv32-esp-elf-gcc"
+
+# Extra CFLAGS for cross-compilation (mlongcalls needed for Xtensa)
+CFLAGS_xtensa_esp32_espidf = "-mlongcalls"
+CFLAGS_xtensa_esp32s2_espidf = "-mlongcalls"
+CFLAGS_xtensa_esp32s3_espidf = "-mlongcalls"
+
+# Bindgen extra clang args for ESP32 targets
+BINDGEN_EXTRA_CLANG_ARGS_xtensa_esp32_espidf = "--target=xtensa-esp32-elf -mcpu=esp32 -fsigned-char"
+BINDGEN_EXTRA_CLANG_ARGS_xtensa_esp32s2_espidf = "--target=xtensa-esp32s2-elf -mcpu=esp32s2 -fsigned-char"
+BINDGEN_EXTRA_CLANG_ARGS_xtensa_esp32s3_espidf = "--target=xtensa-esp32s3-elf -mcpu=esp32s3 -fsigned-char"
