@@ -122,9 +122,43 @@ loop {
 }
 ```
 
-## Available Widgets
+## Widget Status
 
-Label, Button, Slider, Switch, Checkbox, Bar, Arc, Spinner
+| Widget | Status | Notes |
+|--------|--------|-------|
+| Label | done | Text display, long mode, static text |
+| Button | done | Click events, create with label helper |
+| Slider | done | Value, range, animation |
+| Switch | done | On/off toggle |
+| Checkbox | done | Check/uncheck with text |
+| Bar | done | Progress bar with range |
+| Arc | done | Gauge with angles, modes |
+| Spinner | done | Loading animation |
+| Dropdown | done | Options, selection, open/close |
+| Textarea | done | Text input, cursor, password mode |
+| Roller | done | Scrollable option picker |
+| LED | done | On/off/toggle, brightness, color |
+| Line | done | Point arrays, Y invert |
+| Image | done | Source, rotation, scale, pivot |
+| Spinbox | done | Numeric input with inc/dec |
+| Scale | done | Gauge with ticks and labels |
+| Buttonmatrix | done | Grid of buttons from map |
+| Table | done | Rows, columns, cell values |
+| Chart | done | Series, types, ranges |
+| List | done | Text items and buttons |
+| Msgbox | done | Title, text, footer buttons |
+| Tabview | done | Tabbed container |
+| Tileview | done | Swipeable tile grid |
+| Calendar | done | Date picker, highlights |
+| Keyboard | done | On-screen keyboard |
+| Menu | done | Pages, sections, sidebar |
+| Canvas | done | Pixel drawing, fill |
+| Win | done | Window with header/content |
+| Animimg | -- | Planned later |
+| Imagebutton | -- | Planned later |
+| Spangroup | -- | Planned later |
+
+All LVGL widgets are accessible via raw FFI bindings at `lvgl::sys` even if not yet wrapped.
 
 ## Features
 
