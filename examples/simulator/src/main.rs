@@ -1,13 +1,10 @@
 //! LVGL Desktop Simulator
 //!
-//! Run your LVGL UI on desktop for rapid development and testing.
+//! Demonstrates a variety of LVGL widgets wrapped in safe Rust.
 //! Uses SDL2 for window rendering and mouse input.
 //!
 //! Build and run:
 //!   cargo run
-//!
-//! Or with release optimizations:
-//!   cargo run --release
 
 mod simulator_display;
 
@@ -16,7 +13,7 @@ use std::time::{Duration, Instant};
 
 use lvgl::display::{Display, RenderMode};
 use lvgl::input::{InputDevice, InputType};
-use lvgl::widgets::{Arc, Bar, Button, Label, Slider, Spinner, Switch};
+use lvgl::widgets::*;
 use lvgl::{Color, Event, LvglObj, Obj, Style};
 
 use simulator_display::SimulatorDisplay;
@@ -81,7 +78,7 @@ unsafe extern "C" fn touch_read_cb(
 }
 
 // =============================================================================
-// Helpers for raw LVGL calls not yet wrapped
+// Layout helpers
 // =============================================================================
 
 fn set_flex_flow(obj: &impl LvglObj, flow: u32) {
@@ -104,7 +101,11 @@ fn pct(v: i32) -> i32 {
     unsafe { lvgl::sys::lv_pct(v) }
 }
 
-/// Create a transparent container row (no background, no border, no scroll)
+fn set_pad_column(obj: &impl LvglObj, pad: i32) {
+    unsafe { lvgl::sys::lv_obj_set_style_pad_column(obj.raw(), pad, 0) }
+}
+
+/// Create a transparent container row
 fn create_row(parent: &impl LvglObj) -> Result<Obj, lvgl::LvglError> {
     let row = Obj::create(parent)?;
     remove_style_all(&row);
@@ -189,7 +190,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 // =============================================================================
-// Demo UI
+// Demo UI — Tabview with 3 tabs
 // =============================================================================
 
 fn create_demo_ui() -> Result<(), lvgl::LvglError> {
@@ -199,96 +200,120 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     let mut bg_style = Style::new();
     bg_style.set_bg_color(Color::hex(0x1a1a2e));
     bg_style.set_bg_opa(255);
-    bg_style.set_pad_all(12);
-    bg_style.set_pad_row(8);
     screen.add_style(&bg_style, 0);
 
-    // Vertical flex layout on screen
-    set_flex_flow(&screen, lvgl::sys::LV_FLEX_FLOW_COLUMN);
+    // Tabview — 3 pages
+    let tabview = Tabview::create(&screen)?;
+    tabview.set_size(320, 240);
+    tabview.set_tab_bar_size(28);
+
+    // Style the tab bar
+    let tab_bar = tabview.get_tab_bar();
+    let mut tab_bar_style = Style::new();
+    tab_bar_style.set_bg_color(Color::hex(0x16213e));
+    tab_bar_style.set_pad_all(0);
+    tab_bar.add_style(&tab_bar_style, 0);
+
+    let tab1 = tabview.add_tab(c"Controls");
+    let tab2 = tabview.add_tab(c"Data");
+    let tab3 = tabview.add_tab(c"Inputs");
+
+    // Style each tab content area
+    let mut tab_style = Style::new();
+    tab_style.set_bg_color(Color::hex(0x1a1a2e));
+    tab_style.set_pad_all(8);
+    tab_style.set_pad_row(6);
+    tab1.add_style(&tab_style, 0);
+    tab2.add_style(&tab_style, 0);
+    tab3.add_style(&tab_style, 0);
+
+    create_controls_tab(&tab1)?;
+    create_data_tab(&tab2)?;
+    create_inputs_tab(&tab3)?;
+
+    Ok(())
+}
+
+// =============================================================================
+// Tab 1: Controls — Button, Slider, Switch, Checkbox, LED
+// =============================================================================
+
+fn create_controls_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
+    set_flex_flow(tab, lvgl::sys::LV_FLEX_FLOW_COLUMN);
     set_flex_align(
-        &screen,
+        tab,
         lvgl::sys::LV_FLEX_ALIGN_START,
         lvgl::sys::LV_FLEX_ALIGN_CENTER,
         lvgl::sys::LV_FLEX_ALIGN_CENTER,
     );
 
-    // ---- Title ----
-    let title = Label::create(&screen)?;
-    title.set_text(c"LVGL Rust Simulator");
-    title.set_text_color(Color::hex(0x00d4ff));
+    // Button with LED indicator
+    let btn_row = create_row(tab)?;
+    set_pad_column(&btn_row, 12);
 
-    // ---- Button ----
-    let btn = Button::create(&screen)?;
-    btn.set_size(200, 40);
+    let led = Led::create(&btn_row)?;
+    led.set_size(20, 20);
+    led.set_color(Color::hex(0x00ff88));
+    led.off();
 
+    let btn = Button::create(&btn_row)?;
+    btn.set_size(120, 36);
     let mut btn_style = Style::new();
     btn_style.set_bg_color(Color::hex(0x0077b6));
     btn_style.set_radius(8);
-    btn_style.set_shadow_width(4);
-    btn_style.set_shadow_color(Color::hex(0x000000));
-    btn_style.set_shadow_opa(100);
     btn.add_style(&btn_style, 0);
 
     let btn_label = Label::create(&btn)?;
-    btn_label.set_text(c"Click Me!");
+    btn_label.set_text(c"Toggle LED");
     btn_label.center();
 
-    static mut CLICK_COUNT: u32 = 0;
-    btn.add_event_cb(Event::Clicked, || unsafe {
-        CLICK_COUNT += 1;
-        println!("Button clicked! Count: {}", CLICK_COUNT);
+    let led_ptr = led.raw();
+    btn.add_event_cb(Event::Clicked, move || unsafe {
+        lvgl::sys::lv_led_toggle(led_ptr);
     });
 
-    // ---- Slider row: label + slider ----
-    let slider_row = create_row(&screen)?;
-    slider_row.set_style_pad_all(4, 0);
+    // Slider with live value
+    let slider_row = create_row(tab)?;
+    set_pad_column(&slider_row, 8);
 
-    let slider_lbl = Label::create(&slider_row)?;
-    slider_lbl.set_text(c"Slider");
-    slider_lbl.set_text_color(Color::hex(0xaaaaaa));
-    slider_lbl.set_width(60);
+    let slider_val = Label::create(&slider_row)?;
+    slider_val.set_text(c"50");
+    slider_val.set_text_color(Color::hex(0x00d4ff));
+    slider_val.set_width(28);
 
     let slider = Slider::create(&slider_row)?;
-    slider.set_size(200, 12);
+    slider.set_size(200, 10);
     slider.set_range(0, 100);
     slider.set_value(50, false);
 
-    // ---- Progress bar row: label + bar ----
-    let bar_row = create_row(&screen)?;
-    bar_row.set_style_pad_all(4, 0);
-
-    let bar_lbl = Label::create(&bar_row)?;
-    bar_lbl.set_text(c"Progress");
-    bar_lbl.set_text_color(Color::hex(0xaaaaaa));
-    bar_lbl.set_width(60);
-
-    let bar = Bar::create(&bar_row)?;
-    bar.set_size(200, 12);
-    bar.set_range(0, 100);
-    bar.set_value(75, true);
-
-    // ---- Switch row: label + switch ----
-    let switch_row = create_row(&screen)?;
-    switch_row.set_style_pad_all(4, 0);
-
-    let switch_lbl = Label::create(&switch_row)?;
-    switch_lbl.set_text(c"Enable");
-    switch_lbl.set_text_color(Color::hex(0xaaaaaa));
-    switch_lbl.set_width(60);
-
-    let switch = Switch::create(&switch_row)?;
-    switch.set_checked(true);
-
-    switch.add_event_cb(Event::ValueChanged, || {
-        println!("Switch toggled");
+    let slider_ptr = slider.raw();
+    let slider_val_ptr = slider_val.raw();
+    slider.add_event_cb(Event::ValueChanged, move || unsafe {
+        let val = lvgl::sys::lv_slider_get_value(slider_ptr);
+        let mut buf = [0u8; 8];
+        let text = format_int(&mut buf, val);
+        lvgl::sys::lv_label_set_text(slider_val_ptr, text.as_ptr() as *const _);
     });
 
-    // ---- Bottom row: Arc + Spinner ----
-    let bottom_row = create_row(&screen)?;
-    bottom_row.set_style_pad_all(4, 0);
+    // Switch + Checkbox row
+    let toggle_row = create_row(tab)?;
+    set_pad_column(&toggle_row, 16);
 
-    // Arc gauge
-    let arc = Arc::create(&bottom_row)?;
+    let sw_label = Label::create(&toggle_row)?;
+    sw_label.set_text(c"WiFi");
+    sw_label.set_text_color(Color::hex(0xaaaaaa));
+
+    let sw = Switch::create(&toggle_row)?;
+    sw.set_checked(true);
+
+    let cb = Checkbox::create(&toggle_row)?;
+    cb.set_text(c"Dark mode");
+
+    // Arc gauge with percentage
+    let arc_row = create_row(tab)?;
+    set_pad_column(&arc_row, 20);
+
+    let arc = Arc::create(&arc_row)?;
     arc.set_size(80, 80);
     arc.set_range(0, 100);
     arc.set_value(65);
@@ -299,7 +324,6 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     arc_label.center();
     arc_label.set_text_color(Color::hex(0x00ff88));
 
-    // Update label when arc value changes
     let arc_ptr = arc.raw();
     let arc_label_ptr = arc_label.raw();
     arc.add_event_cb(Event::ValueChanged, move || unsafe {
@@ -309,20 +333,148 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
         lvgl::sys::lv_label_set_text(arc_label_ptr, text.as_ptr() as *const _);
     });
 
-    // Spacer between arc and spinner
-    let spacer = Obj::create(&bottom_row)?;
-    remove_style_all(&spacer);
-    spacer.set_size(40, 1);
-
-    // Spinner
-    let spinner = Spinner::create(&bottom_row)?;
+    let spinner = Spinner::create(&arc_row)?;
     spinner.set_size(50, 50);
     spinner.set_anim_params(1000, 270);
 
     Ok(())
 }
 
-/// Format an integer as "N%" into a buffer, returning a null-terminated slice.
+// =============================================================================
+// Tab 2: Data — Chart, Bar, Table
+// =============================================================================
+
+fn create_data_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
+    set_flex_flow(tab, lvgl::sys::LV_FLEX_FLOW_COLUMN);
+    set_flex_align(
+        tab,
+        lvgl::sys::LV_FLEX_ALIGN_START,
+        lvgl::sys::LV_FLEX_ALIGN_CENTER,
+        lvgl::sys::LV_FLEX_ALIGN_CENTER,
+    );
+
+    // Line chart
+    let chart = Chart::create(tab)?;
+    chart.set_size(290, 90);
+    chart.set_type(ChartType::Line);
+    chart.set_point_count(12);
+    chart.set_range(ChartAxis::PrimaryY, 0, 100);
+    chart.set_div_line_count(3, 5);
+
+    let mut chart_style = Style::new();
+    chart_style.set_bg_color(Color::hex(0x16213e));
+    chart_style.set_radius(6);
+    chart_style.set_border_width(0);
+    chart.add_style(&chart_style, 0);
+
+    let series1 = chart.add_series(Color::hex(0x00d4ff), ChartAxis::PrimaryY);
+    let series2 = chart.add_series(Color::hex(0xff6b6b), ChartAxis::PrimaryY);
+
+    // Populate with sample data
+    let data1 = [20, 35, 50, 45, 70, 60, 80, 75, 90, 85, 65, 55];
+    let data2 = [50, 40, 30, 55, 45, 35, 60, 50, 40, 70, 55, 45];
+    for i in 0..12 {
+        chart.set_next_value(&series1, data1[i]);
+        chart.set_next_value(&series2, data2[i]);
+    }
+
+    // Progress bars with labels
+    let bar_row1 = create_row(tab)?;
+    set_pad_column(&bar_row1, 8);
+    let lbl1 = Label::create(&bar_row1)?;
+    lbl1.set_text(c"CPU");
+    lbl1.set_text_color(Color::hex(0xaaaaaa));
+    lbl1.set_width(36);
+    let bar1 = Bar::create(&bar_row1)?;
+    bar1.set_size(220, 10);
+    bar1.set_range(0, 100);
+    bar1.set_value(72, true);
+
+    let bar_row2 = create_row(tab)?;
+    set_pad_column(&bar_row2, 8);
+    let lbl2 = Label::create(&bar_row2)?;
+    lbl2.set_text(c"RAM");
+    lbl2.set_text_color(Color::hex(0xaaaaaa));
+    lbl2.set_width(36);
+    let bar2 = Bar::create(&bar_row2)?;
+    bar2.set_size(220, 10);
+    bar2.set_range(0, 100);
+    bar2.set_value(45, true);
+
+    let bar_row3 = create_row(tab)?;
+    set_pad_column(&bar_row3, 8);
+    let lbl3 = Label::create(&bar_row3)?;
+    lbl3.set_text(c"Disk");
+    lbl3.set_text_color(Color::hex(0xaaaaaa));
+    lbl3.set_width(36);
+    let bar3 = Bar::create(&bar_row3)?;
+    bar3.set_size(220, 10);
+    bar3.set_range(0, 100);
+    bar3.set_value(88, true);
+
+    Ok(())
+}
+
+// =============================================================================
+// Tab 3: Inputs — Dropdown, Roller, Textarea
+// =============================================================================
+
+fn create_inputs_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
+    set_flex_flow(tab, lvgl::sys::LV_FLEX_FLOW_COLUMN);
+    set_flex_align(
+        tab,
+        lvgl::sys::LV_FLEX_ALIGN_START,
+        lvgl::sys::LV_FLEX_ALIGN_CENTER,
+        lvgl::sys::LV_FLEX_ALIGN_CENTER,
+    );
+
+    // Dropdown
+    let dd_row = create_row(tab)?;
+    set_pad_column(&dd_row, 8);
+
+    let dd_label = Label::create(&dd_row)?;
+    dd_label.set_text(c"Theme");
+    dd_label.set_text_color(Color::hex(0xaaaaaa));
+    dd_label.set_width(46);
+
+    let dd = Dropdown::create(&dd_row)?;
+    dd.set_width(180);
+    dd.set_options(c"Dark\nLight\nBlue\nGreen\nOcean");
+
+    // Roller
+    let roller_row = create_row(tab)?;
+    set_pad_column(&roller_row, 8);
+
+    let roller_label = Label::create(&roller_row)?;
+    roller_label.set_text(c"Speed");
+    roller_label.set_text_color(Color::hex(0xaaaaaa));
+    roller_label.set_width(46);
+
+    let roller = Roller::create(&roller_row)?;
+    roller.set_options(c"9600\n19200\n38400\n57600\n115200", RollerMode::Normal);
+    roller.set_visible_row_count(3);
+    roller.set_width(120);
+    roller.set_selected(4, false);
+
+    // Textarea
+    let ta_label = Label::create(tab)?;
+    ta_label.set_text(c"Notes:");
+    ta_label.set_text_color(Color::hex(0xaaaaaa));
+
+    let ta = Textarea::create(tab)?;
+    ta.set_width(280);
+    ta.set_height(60);
+    ta.set_placeholder_text(c"Type something...");
+    ta.set_text(c"LVGL + Rust");
+
+    Ok(())
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+/// Format an integer as "N%" with null terminator.
 fn format_int_percent(buf: &mut [u8; 8], val: i32) -> &[u8] {
     let mut n = if val < 0 { 0 } else { val as u32 };
     let mut tmp = [0u8; 6];
@@ -337,11 +489,38 @@ fn format_int_percent(buf: &mut [u8; 8], val: i32) -> &[u8] {
             len += 1;
         }
     }
-    // Reverse digits into buf
     for i in 0..len {
         buf[i] = tmp[len - 1 - i];
     }
     buf[len] = b'%';
-    buf[len + 1] = 0; // null terminator
+    buf[len + 1] = 0;
     &buf[..len + 2]
+}
+
+/// Format an integer with null terminator (no % suffix).
+fn format_int(buf: &mut [u8; 8], val: i32) -> &[u8] {
+    let negative = val < 0;
+    let mut n = if negative { (-val) as u32 } else { val as u32 };
+    let mut tmp = [0u8; 6];
+    let mut len = 0;
+    if n == 0 {
+        tmp[0] = b'0';
+        len = 1;
+    } else {
+        while n > 0 {
+            tmp[len] = b'0' + (n % 10) as u8;
+            n /= 10;
+            len += 1;
+        }
+    }
+    let mut pos = 0;
+    if negative {
+        buf[0] = b'-';
+        pos = 1;
+    }
+    for i in 0..len {
+        buf[pos + i] = tmp[len - 1 - i];
+    }
+    buf[pos + len] = 0;
+    &buf[..pos + len + 1]
 }
