@@ -127,7 +127,7 @@
 #define LV_USE_BAR        1
 #define LV_USE_BUTTON     1
 #define LV_USE_BUTTONMATRIX 1
-#define LV_USE_CANVAS     0  /* Uses lots of RAM */
+#define LV_USE_CANVAS     0  /* Needs large pixel buffer — enable if you have PSRAM */
 #define LV_USE_CHECKBOX   1
 #define LV_USE_DROPDOWN   1
 #define LV_USE_IMAGE      1
@@ -142,22 +142,22 @@
 
 /* Extra widgets */
 #define LV_USE_ANIMIMG    0
-#define LV_USE_CALENDAR   0
+#define LV_USE_CALENDAR   1
 #define LV_USE_CHART      1
 #define LV_USE_COLORWHEEL 0
 #define LV_USE_IMGBTN     0
 #define LV_USE_KEYBOARD   1
 #define LV_USE_LED        1
 #define LV_USE_LIST       1
-#define LV_USE_MENU       0
+#define LV_USE_MENU       1
 #define LV_USE_METER      1
 #define LV_USE_MSGBOX     1
 #define LV_USE_SPAN       0
-#define LV_USE_SPINBOX    0
+#define LV_USE_SPINBOX    1
 #define LV_USE_SPINNER    1
 #define LV_USE_TABVIEW    1
-#define LV_USE_TILEVIEW   0
-#define LV_USE_WIN        0
+#define LV_USE_TILEVIEW   1
+#define LV_USE_WIN        1
 
 /*====================
    LAYOUTS

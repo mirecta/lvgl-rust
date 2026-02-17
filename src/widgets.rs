@@ -2041,15 +2041,20 @@ pub enum MenuModeRootBackButton {
 }
 
 // ============================================================================
-// Canvas
+// Canvas (requires LV_USE_CANVAS — disabled on ESP32 by default)
 // ============================================================================
 
 /// Canvas widget for pixel-level drawing
+///
+/// Only available with the `simulator` feature (or when `LV_USE_CANVAS = 1`
+/// in your `lv_conf.h`). Requires a large pixel buffer.
+#[cfg(feature = "simulator")]
 pub struct Canvas {
     raw: *mut sys::lv_obj_t,
     _marker: PhantomData<*mut ()>,
 }
 
+#[cfg(feature = "simulator")]
 impl Canvas {
     /// Create a new canvas on the given parent
     pub fn create(parent: &impl LvglObj) -> Result<Self> {
@@ -2085,6 +2090,7 @@ impl Canvas {
     }
 }
 
+#[cfg(feature = "simulator")]
 impl LvglObj for Canvas {
     fn raw(&self) -> *mut sys::lv_obj_t {
         self.raw
