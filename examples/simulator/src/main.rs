@@ -196,10 +196,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     let screen = lvgl::screen_active().expect("No active screen");
 
-    // Dark background
+    // Screen padding (keep default light theme)
     let bg_style = Box::leak(Box::new(Style::new()));
-    bg_style.set_bg_color(Color::hex(0x1a1a2e));
-    bg_style.set_bg_opa(255);
     screen.add_style(bg_style, 0);
 
     // Tabview — 3 pages
@@ -207,10 +205,9 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     tabview.set_size(320, 240);
     tabview.set_tab_bar_size(28);
 
-    // Style the tab bar
+    // Remove dark background from tab bar so it uses default theme
     let tab_bar = tabview.get_tab_bar();
     let tab_bar_style = Box::leak(Box::new(Style::new()));
-    tab_bar_style.set_bg_color(Color::hex(0x16213e));
     tab_bar_style.set_pad_all(0);
     tab_bar.add_style(tab_bar_style, 0);
 
@@ -218,9 +215,8 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     let tab2 = tabview.add_tab(c"Data");
     let tab3 = tabview.add_tab(c"Inputs");
 
-    // Style each tab content area
+    // Tab content padding
     let tab_style = Box::leak(Box::new(Style::new()));
-    tab_style.set_bg_color(Color::hex(0x1a1a2e));
     tab_style.set_pad_all(8);
     tab_style.set_pad_row(6);
     tab1.add_style(tab_style, 0);
@@ -278,7 +274,7 @@ fn create_controls_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
 
     let slider_val = Label::create(&slider_row)?;
     slider_val.set_text(c"50");
-    slider_val.set_text_color(Color::hex(0x00d4ff));
+    slider_val.set_text_color(Color::hex(0x0077b6));
     slider_val.set_width(28);
 
     let slider = Slider::create(&slider_row)?;
@@ -301,7 +297,7 @@ fn create_controls_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
 
     let sw_label = Label::create(&toggle_row)?;
     sw_label.set_text(c"WiFi");
-    sw_label.set_text_color(Color::hex(0xaaaaaa));
+    sw_label.set_text_color(Color::hex(0x555555));
 
     let sw = Switch::create(&toggle_row)?;
     sw.set_checked(true);
@@ -322,7 +318,7 @@ fn create_controls_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     let arc_label = Label::create(&arc)?;
     arc_label.set_text(c"65%");
     arc_label.center();
-    arc_label.set_text_color(Color::hex(0x00ff88));
+    arc_label.set_text_color(Color::hex(0x2e7d32));
 
     let arc_ptr = arc.raw();
     let arc_label_ptr = arc_label.raw();
@@ -362,13 +358,13 @@ fn create_data_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     chart.set_div_line_count(3, 5);
 
     let chart_style = Box::leak(Box::new(Style::new()));
-    chart_style.set_bg_color(Color::hex(0x16213e));
+    chart_style.set_bg_color(Color::hex(0xf0f0f0));
     chart_style.set_radius(6);
     chart_style.set_border_width(0);
     chart.add_style(chart_style, 0);
 
-    let series1 = chart.add_series(Color::hex(0x00d4ff), ChartAxis::PrimaryY);
-    let series2 = chart.add_series(Color::hex(0xff6b6b), ChartAxis::PrimaryY);
+    let series1 = chart.add_series(Color::hex(0x0077b6), ChartAxis::PrimaryY);
+    let series2 = chart.add_series(Color::hex(0xd32f2f), ChartAxis::PrimaryY);
 
     // Populate with sample data
     let data1 = [20, 35, 50, 45, 70, 60, 80, 75, 90, 85, 65, 55];
@@ -383,7 +379,7 @@ fn create_data_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     set_pad_column(&bar_row1, 8);
     let lbl1 = Label::create(&bar_row1)?;
     lbl1.set_text(c"CPU");
-    lbl1.set_text_color(Color::hex(0xaaaaaa));
+    lbl1.set_text_color(Color::hex(0x555555));
     lbl1.set_width(36);
     let bar1 = Bar::create(&bar_row1)?;
     bar1.set_size(220, 10);
@@ -394,7 +390,7 @@ fn create_data_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     set_pad_column(&bar_row2, 8);
     let lbl2 = Label::create(&bar_row2)?;
     lbl2.set_text(c"RAM");
-    lbl2.set_text_color(Color::hex(0xaaaaaa));
+    lbl2.set_text_color(Color::hex(0x555555));
     lbl2.set_width(36);
     let bar2 = Bar::create(&bar_row2)?;
     bar2.set_size(220, 10);
@@ -405,7 +401,7 @@ fn create_data_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     set_pad_column(&bar_row3, 8);
     let lbl3 = Label::create(&bar_row3)?;
     lbl3.set_text(c"Disk");
-    lbl3.set_text_color(Color::hex(0xaaaaaa));
+    lbl3.set_text_color(Color::hex(0x555555));
     lbl3.set_width(36);
     let bar3 = Bar::create(&bar_row3)?;
     bar3.set_size(220, 10);
@@ -434,7 +430,7 @@ fn create_inputs_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
 
     let dd_label = Label::create(&dd_row)?;
     dd_label.set_text(c"Theme");
-    dd_label.set_text_color(Color::hex(0xaaaaaa));
+    dd_label.set_text_color(Color::hex(0x555555));
     dd_label.set_width(46);
 
     let dd = Dropdown::create(&dd_row)?;
@@ -447,7 +443,7 @@ fn create_inputs_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
 
     let roller_label = Label::create(&roller_row)?;
     roller_label.set_text(c"Baud");
-    roller_label.set_text_color(Color::hex(0xaaaaaa));
+    roller_label.set_text_color(Color::hex(0x555555));
     roller_label.set_width(36);
 
     let roller = Roller::create(&roller_row)?;
