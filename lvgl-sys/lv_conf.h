@@ -24,21 +24,13 @@
    MEMORY SETTINGS
  *====================*/
 
-/* Size of the memory available for `lv_malloc()` in bytes (>= 2kB) */
-/* For ESP32 without PSRAM, keep this reasonable */
+/* Use system malloc (LVGL 9.x) */
+#define LV_USE_STDLIB_MALLOC    LV_STDLIB_CLIB
+#define LV_USE_STDLIB_STRING    LV_STDLIB_CLIB
+#define LV_USE_STDLIB_SPRINTF   LV_STDLIB_CLIB
+
+/* Fallback pool size (only used if builtin allocator) */
 #define LV_MEM_SIZE (48 * 1024U)
-
-/* Use custom malloc/free (0 = lvgl internal, 1 = system malloc) */
-#define LV_MEM_CUSTOM 1
-#if LV_MEM_CUSTOM
-    #define LV_MEM_CUSTOM_INCLUDE <stdlib.h>
-    #define LV_MEM_CUSTOM_ALLOC   malloc
-    #define LV_MEM_CUSTOM_FREE    free
-    #define LV_MEM_CUSTOM_REALLOC realloc
-#endif
-
-/* Memory pool for small allocations */
-#define LV_MEM_POOL_EXPAND_SIZE 0
 
 /*====================
    HAL SETTINGS
