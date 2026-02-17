@@ -197,10 +197,10 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     let screen = lvgl::screen_active().expect("No active screen");
 
     // Dark background
-    let mut bg_style = Style::new();
+    let bg_style = Box::leak(Box::new(Style::new()));
     bg_style.set_bg_color(Color::hex(0x1a1a2e));
     bg_style.set_bg_opa(255);
-    screen.add_style(&bg_style, 0);
+    screen.add_style(bg_style, 0);
 
     // Tabview — 3 pages
     let tabview = Tabview::create(&screen)?;
@@ -209,23 +209,23 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
 
     // Style the tab bar
     let tab_bar = tabview.get_tab_bar();
-    let mut tab_bar_style = Style::new();
+    let tab_bar_style = Box::leak(Box::new(Style::new()));
     tab_bar_style.set_bg_color(Color::hex(0x16213e));
     tab_bar_style.set_pad_all(0);
-    tab_bar.add_style(&tab_bar_style, 0);
+    tab_bar.add_style(tab_bar_style, 0);
 
     let tab1 = tabview.add_tab(c"Controls");
     let tab2 = tabview.add_tab(c"Data");
     let tab3 = tabview.add_tab(c"Inputs");
 
     // Style each tab content area
-    let mut tab_style = Style::new();
+    let tab_style = Box::leak(Box::new(Style::new()));
     tab_style.set_bg_color(Color::hex(0x1a1a2e));
     tab_style.set_pad_all(8);
     tab_style.set_pad_row(6);
-    tab1.add_style(&tab_style, 0);
-    tab2.add_style(&tab_style, 0);
-    tab3.add_style(&tab_style, 0);
+    tab1.add_style(tab_style, 0);
+    tab2.add_style(tab_style, 0);
+    tab3.add_style(tab_style, 0);
 
     create_controls_tab(&tab1)?;
     create_data_tab(&tab2)?;
@@ -258,10 +258,10 @@ fn create_controls_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
 
     let btn = Button::create(&btn_row)?;
     btn.set_size(120, 36);
-    let mut btn_style = Style::new();
+    let btn_style = Box::leak(Box::new(Style::new()));
     btn_style.set_bg_color(Color::hex(0x0077b6));
     btn_style.set_radius(8);
-    btn.add_style(&btn_style, 0);
+    btn.add_style(btn_style, 0);
 
     let btn_label = Label::create(&btn)?;
     btn_label.set_text(c"Toggle LED");
@@ -361,11 +361,11 @@ fn create_data_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     chart.set_range(ChartAxis::PrimaryY, 0, 100);
     chart.set_div_line_count(3, 5);
 
-    let mut chart_style = Style::new();
+    let chart_style = Box::leak(Box::new(Style::new()));
     chart_style.set_bg_color(Color::hex(0x16213e));
     chart_style.set_radius(6);
     chart_style.set_border_width(0);
-    chart.add_style(&chart_style, 0);
+    chart.add_style(chart_style, 0);
 
     let series1 = chart.add_series(Color::hex(0x00d4ff), ChartAxis::PrimaryY);
     let series2 = chart.add_series(Color::hex(0xff6b6b), ChartAxis::PrimaryY);
@@ -446,24 +446,18 @@ fn create_inputs_tab(tab: &Obj) -> Result<(), lvgl::LvglError> {
     set_pad_column(&roller_row, 8);
 
     let roller_label = Label::create(&roller_row)?;
-    roller_label.set_text(c"Speed");
+    roller_label.set_text(c"Baud");
     roller_label.set_text_color(Color::hex(0xaaaaaa));
-    roller_label.set_width(46);
+    roller_label.set_width(36);
 
     let roller = Roller::create(&roller_row)?;
     roller.set_options(c"9600\n19200\n38400\n57600\n115200", RollerMode::Normal);
     roller.set_visible_row_count(3);
-    roller.set_width(120);
     roller.set_selected(4, false);
 
     // Textarea
-    let ta_label = Label::create(tab)?;
-    ta_label.set_text(c"Notes:");
-    ta_label.set_text_color(Color::hex(0xaaaaaa));
-
     let ta = Textarea::create(tab)?;
-    ta.set_width(280);
-    ta.set_height(60);
+    ta.set_size(270, 50);
     ta.set_placeholder_text(c"Type something...");
     ta.set_text(c"LVGL + Rust");
 

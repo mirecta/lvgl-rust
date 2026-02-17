@@ -22,19 +22,13 @@
    MEMORY SETTINGS
  *====================*/
 
-/* Desktop has plenty of RAM */
-#define LV_MEM_SIZE (256 * 1024U)
+/* Use system malloc (LVGL 9.x) */
+#define LV_USE_STDLIB_MALLOC    LV_STDLIB_CLIB
+#define LV_USE_STDLIB_STRING    LV_STDLIB_CLIB
+#define LV_USE_STDLIB_SPRINTF   LV_STDLIB_CLIB
 
-/* Use system malloc */
-#define LV_MEM_CUSTOM 1
-#if LV_MEM_CUSTOM
-    #define LV_MEM_CUSTOM_INCLUDE <stdlib.h>
-    #define LV_MEM_CUSTOM_ALLOC   malloc
-    #define LV_MEM_CUSTOM_FREE    free
-    #define LV_MEM_CUSTOM_REALLOC realloc
-#endif
-
-#define LV_MEM_POOL_EXPAND_SIZE 0
+/* Fallback pool size (only used if builtin allocator) */
+#define LV_MEM_SIZE (512 * 1024U)
 
 /*====================
    HAL SETTINGS

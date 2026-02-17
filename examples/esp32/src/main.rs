@@ -209,12 +209,12 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
     let screen = lvgl::screen_active().expect("No active screen");
 
     // Dark background with vertical flex
-    let mut bg_style = Style::new();
+    let bg_style = Box::leak(Box::new(Style::new()));
     bg_style.set_bg_color(Color::hex(0x1a1a2e));
     bg_style.set_bg_opa(255);
     bg_style.set_pad_all(8);
     bg_style.set_pad_row(8);
-    screen.add_style(&bg_style, 0);
+    screen.add_style(bg_style, 0);
 
     set_flex_flow(&screen, lvgl::sys::LV_FLEX_FLOW_COLUMN);
     set_flex_align(
@@ -240,10 +240,10 @@ fn create_demo_ui() -> Result<(), lvgl::LvglError> {
 
     let btn = Button::create(&btn_row)?;
     btn.set_size(110, 34);
-    let mut btn_style = Style::new();
+    let btn_style = Box::leak(Box::new(Style::new()));
     btn_style.set_bg_color(Color::hex(0x0077b6));
     btn_style.set_radius(8);
-    btn.add_style(&btn_style, 0);
+    btn.add_style(btn_style, 0);
     let btn_label = Label::create(&btn)?;
     btn_label.set_text(c"Toggle LED");
     btn_label.center();
